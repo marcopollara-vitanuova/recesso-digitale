@@ -38,6 +38,9 @@ yarn-error.log*
 docs/AUTONOMIA.md
 docs/PREREQUISITI.md
 
+# supabase cli local state
+supabase/.temp/
+
 # vercel
 .vercel
 
