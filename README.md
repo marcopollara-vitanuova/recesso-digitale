@@ -28,10 +28,12 @@ Piattaforma web per l’esercizio online del diritto di recesso su polizze assic
 
 ```bash
 npm install
-npx prisma migrate dev
-npm run db:seed   # dopo implementazione seed
+npm run db:migrate    # prima volta: crea tabelle
+npm run db:seed       # admin, settings, template, compagnie demo
 npm run dev
 ```
+
+Altri comandi: `npm run db:studio`, `npm run db:migrate:deploy` (produzione).
 
 - Pubblico: http://localhost:3000/recesso  
 - Admin: http://localhost:3000/admin  
