@@ -1,15 +1,12 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { SkipLink } from "@/components/a11y/skip-link";
+import { siteMetadata } from "@/lib/site-metadata";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-export const metadata: Metadata = {
-  title: "Recesso Digitale Polizze",
-  description: "Esercita il diritto di recesso dalla tua polizza assicurativa online",
-};
+export const metadata = siteMetadata;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

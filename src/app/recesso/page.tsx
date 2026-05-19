@@ -1,7 +1,23 @@
+import type { Metadata } from "next";
 import { getAppSettings } from "@/lib/settings";
 import { RecessoFlow } from "@/components/recesso/recesso-flow";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+
+export const metadata: Metadata = {
+  title: "Recesso digitale polizze",
+  description:
+    "Compila e invia la richiesta di recesso della polizza assicurativa online. Servizio sicuro di Vitanuova Previdenza e Protezione.",
+  openGraph: {
+    title: "Recesso digitale polizze | Vitanuova",
+    description:
+      "Esercita il diritto di recesso online: compila il modulo, verifica i dati e invia la richiesta alla compagnia.",
+    url: "/recesso",
+  },
+  alternates: {
+    canonical: "/recesso",
+  },
+};
 
 export default async function RecessoPage() {
   const settings = await getAppSettings();
