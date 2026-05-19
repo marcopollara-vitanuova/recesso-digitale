@@ -18,12 +18,13 @@ export default async function AuditLogsPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
+            <caption className="sr-only">Ultime 100 attività registrate nel sistema</caption>
             <thead>
-              <tr className="border-b text-left text-slate-500">
-                <th className="pb-2 pr-4">Data</th>
-                <th className="pb-2 pr-4">Utente</th>
-                <th className="pb-2 pr-4">Azione</th>
-                <th className="pb-2">Entità</th>
+              <tr className="border-b text-left text-slate-800">
+                <th scope="col" className="pb-2 pr-4">Data</th>
+                <th scope="col" className="pb-2 pr-4">Utente</th>
+                <th scope="col" className="pb-2 pr-4">Azione</th>
+                <th scope="col" className="pb-2">Entità</th>
               </tr>
             </thead>
             <tbody>

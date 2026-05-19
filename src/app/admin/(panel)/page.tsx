@@ -34,15 +34,15 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-slate-600">Panoramica richieste di recesso</p>
+        <h1 className="text-2xl font-bold text-[var(--primary-900)]">Dashboard</h1>
+        <p className="text-[var(--gray-600)]">Panoramica richieste di recesso</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((s) => (
           <Card key={s.label}>
             <CardContent className="pt-6">
-              <p className="text-sm text-slate-500">{s.label}</p>
+              <p className="text-sm font-medium text-slate-700">{s.label}</p>
               <p className="text-3xl font-bold">{s.value}</p>
             </CardContent>
           </Card>
@@ -55,20 +55,24 @@ export default async function AdminDashboardPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
+            <caption className="sr-only">Ultime dieci richieste di recesso</caption>
             <thead>
-              <tr className="border-b text-left text-slate-500">
-                <th className="pb-2 pr-4">ID</th>
-                <th className="pb-2 pr-4">Data</th>
-                <th className="pb-2 pr-4">Cliente</th>
-                <th className="pb-2 pr-4">Polizza</th>
-                <th className="pb-2 pr-4">Stato</th>
+              <tr className="border-b text-left text-slate-800">
+                <th scope="col" className="pb-2 pr-4">ID</th>
+                <th scope="col" className="pb-2 pr-4">Data</th>
+                <th scope="col" className="pb-2 pr-4">Cliente</th>
+                <th scope="col" className="pb-2 pr-4">Polizza</th>
+                <th scope="col" className="pb-2 pr-4">Stato</th>
               </tr>
             </thead>
             <tbody>
               {recent.map((r) => (
                 <tr key={r.id} className="border-b border-slate-100">
                   <td className="py-3 pr-4">
-                    <Link href={`/admin/withdrawal-requests/${r.id}`} className="text-teal-700 hover:underline">
+                    <Link
+                      href={`/admin/withdrawal-requests/${r.id}`}
+                      className="font-semibold text-[var(--primary-700)] underline-offset-2 hover:underline"
+                    >
                       {r.publicId}
                     </Link>
                   </td>

@@ -1,25 +1,36 @@
 import { getAppSettings } from "@/lib/settings";
 import { RecessoFlow } from "@/components/recesso/recesso-flow";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export default async function RecessoPage() {
   const settings = await getAppSettings();
 
   if (!settings.publicFormEnabled) {
     return (
-      <div className="mx-auto max-w-xl rounded-xl border border-amber-200 bg-amber-50 p-8 text-center">
-        <h1 className="text-xl font-semibold text-amber-900">Servizio non disponibile</h1>
-        <p className="mt-2 text-amber-800">{settings.maintenanceMessage}</p>
+      <div className="flex min-h-screen flex-col">
+        <SiteHeader title="Recesso digitale polizze" subtitle={settings.maintenanceMessage} />
+        <main id="contenuto-principale" className="vn-container flex-1 py-10">
+          <div
+            className="mx-auto max-w-xl rounded-2xl border-2 border-[var(--warning-500)] bg-[var(--warning-200)] p-8 text-center"
+            role="alert"
+          >
+            <h2 className="text-xl font-semibold text-[var(--primary-900)]">Servizio non disponibile</h2>
+            <p className="mt-2 text-[var(--gray-700)]">{settings.maintenanceMessage}</p>
+          </div>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mb-8 text-center">
-        <p className="text-sm font-medium uppercase tracking-wide text-teal-700">Vitanuova</p>
-        <h1 className="mt-1 text-3xl font-bold text-slate-900">Recesso digitale polizze</h1>
-      </div>
-      <RecessoFlow privacyUrl={settings.privacyPolicyUrl} />
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader title="Recesso digitale polizze" />
+      <main id="contenuto-principale" className="vn-container flex-1 py-8 md:py-12">
+        <RecessoFlow privacyUrl={settings.privacyPolicyUrl} />
+      </main>
+      <SiteFooter />
     </div>
   );
 }

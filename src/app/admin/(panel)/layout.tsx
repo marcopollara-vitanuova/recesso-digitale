@@ -4,7 +4,9 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto bg-slate-50 p-6 md:p-8">{children}</main>
+      <main id="contenuto-admin" className="flex-1 overflow-auto bg-[var(--gray-50)] p-6 md:p-8">
+        {children}
+      </main>
     </div>
   );
 }
