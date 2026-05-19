@@ -13,6 +13,21 @@ export const metadata: Metadata = {
     description:
       "Esercita il diritto di recesso online: compila il modulo, verifica i dati e invia la richiesta alla compagnia.",
     url: "/recesso",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 300,
+        height: 81,
+        alt: "Vitanuova Previdenza e Protezione",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Recesso digitale polizze | Vitanuova",
+    description:
+      "Esercita il diritto di recesso online: compila il modulo, verifica i dati e invia la richiesta alla compagnia.",
+    images: ["/og-image.png"],
   },
   alternates: {
     canonical: "/recesso",
