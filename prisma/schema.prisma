@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  VIEWER
+}
+
+enum WithdrawalRequestStatus {
+  RECEIVED
+  EMAIL_SENT
+  PARTIAL_EMAIL_FAILURE
+  EMAIL_FAILED
+  MANUALLY_RESOLVED
+  CANCELLED
+}
+
+enum EmailType {
+  TO_INSURANCE_COMPANY
+  TO_CUSTOMER
+  TO_BROKER
+  TECHNICAL_ALERT
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+  RETRYING
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String?
+  role         UserRole  @default(ADMIN)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  auditLogs              AuditLog[]
+  internalNotes          InternalNote[]
+  companiesCreated       InsuranceCompany[] @relation("CompanyCreatedBy")
+  companiesUpdated       InsuranceCompany[] @relation("CompanyUpdatedBy")
+
+  @@map("users")
+}
+
+model InsuranceCompany {
+  id              String   @id @default(cuid())
+  legalName       String   @map("legal_name")
+  displayName     String   @map("display_name")
+  internalCode    String?  @unique @map("internal_code")
+  withdrawalEmail String   @map("withdrawal_email")
+  secondaryEmails Json?    @map("secondary_emails")
+  isActive        Boolean  @default(true) @map("is_active")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdById     String?  @map("created_by")
+  updatedById     String?  @map("updated_by")
+
+  createdBy          User?               @relation("CompanyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy          User?               @relation("CompanyUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  withdrawalRequests WithdrawalRequest[]
+
+  @@map("insurance_companies")
+}
+
+model WithdrawalRequest {
+  id                            String                  @id @default(cuid())
+  publicId                      String                  @unique @map("public_id")
+  status                        WithdrawalRequestStatus @default(RECEIVED)
+
+  customerFirstName             String                  @map("customer_first_name")
+  customerLastName              String                  @map("customer_last_name")
+  customerFiscalCode            String                  @map("customer_fiscal_code")
+  customerEmail                 String                  @map("customer_email")
+  customerPhone                 String?                 @map("customer_phone")
+
+  policyNumber                  String                  @map("policy_number")
+  policyIssueDate               DateTime?               @map("policy_issue_date")
+  productType                   String?                 @map("product_type")
+  customerNotes                 String?                 @map("customer_notes")
+
+  insuranceCompanyId            String                  @map("insurance_company_id")
+  insuranceCompany              InsuranceCompany        @relation(fields: [insuranceCompanyId], references: [id])
+  insuranceCompanyNameSnapshot  String                  @map("insurance_company_name_snapshot")
+  insuranceCompanyEmailSnapshot String                  @map("insurance_company_email_snapshot")
+  brokerEmailSnapshot           String                  @map("broker_email_snapshot")
+
+  privacyAccepted               Boolean                 @default(false) @map("privacy_accepted")
+  withdrawalDeclarationAccepted Boolean                 @default(false) @map("withdrawal_declaration_accepted")
+  dataConfirmationAccepted      Boolean                 @default(false) @map("data_confirmation_accepted")
+
+  submittedAt                   DateTime                @default(now()) @map("submitted_at")
+  ipAddress                     String?                 @map("ip_address")
+  userAgent                     String?                 @map("user_agent")
+
+  createdAt                     DateTime                @default(now()) @map("created_at")
+  updatedAt                     DateTime                @updatedAt @map("updated_at")
+
+  emailLogs     EmailLog[]
+  internalNotes InternalNote[]
+
+  @@index([customerFiscalCode])
+  @@index([customerEmail])
+  @@index([policyNumber])
+  @@index([submittedAt])
+  @@index([status])
+  @@map("withdrawal_requests")
+}
+
+model EmailLog {
+  id                  String      @id @default(cuid())
+  withdrawalRequestId String      @map("withdrawal_request_id")
+  withdrawalRequest   WithdrawalRequest @relation(fields: [withdrawalRequestId], references: [id], onDelete: Cascade)
+
+  emailType         EmailType   @map("email_type")
+  recipientTo       String      @map("recipient_to")
+  recipientCc       String?     @map("recipient_cc")
+  recipientBcc      String?     @map("recipient_bcc")
+  subject           String
+  body              String
+  provider          String?
+  providerMessageId String?     @map("provider_message_id")
+  status            EmailStatus @default(PENDING)
+  errorMessage      String?     @map("error_message")
+  sentAt            DateTime?   @map("sent_at")
+  createdAt         DateTime    @default(now()) @map("created_at")
+
+  @@index([withdrawalRequestId])
+  @@index([status])
+  @@index([emailType])
+  @@map("email_logs")
+}
+
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  type        String   @default("string")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  templateKey String   @unique @map("template_key")
+  name        String
+  subject     String
+  bodyText    String   @map("body_text")
+  bodyHtml    String?  @map("body_html")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("email_templates")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?  @map("user_id")
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  beforeData Json?    @map("before_data")
+  afterData  Json?    @map("after_data")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model InternalNote {
+  id                  String            @id @default(cuid())
+  withdrawalRequestId String            @map("withdrawal_request_id")
+  withdrawalRequest   WithdrawalRequest @relation(fields: [withdrawalRequestId], references: [id], onDelete: Cascade)
+  userId              String            @map("user_id")
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note                String
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  @@index([withdrawalRequestId])
+  @@map("internal_notes")
+}
