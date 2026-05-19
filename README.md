@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Recesso Digitale Polizze — Fase 1
 
-## Getting Started
+Piattaforma web per l’esercizio online del diritto di recesso su polizze assicurative (broker).
 
-First, run the development server:
+## Stack
+
+- Next.js (App Router) + TypeScript + Tailwind
+- Prisma + PostgreSQL (**Supabase**)
+- Auth.js (area admin)
+- Resend (email)
+- Deploy: **Vercel**
+
+## Percorso progetto
+
+`~/sites/recesso-digitale`
+
+## Setup iniziale (tu)
+
+1. Leggi **`~/.cursor/harness/recesso-digitale/AUTONOMIA.md`** e completa:
+   - Supabase: progetto nuovo + `DATABASE_URL` / `DIRECT_URL` in `.env.local`
+   - Resend: `RESEND_API_KEY`
+   - `AUTH_SECRET` (openssl)
+   - Vercel: `VERCEL_TOKEN` in `~/.zshrc` (se non già fatto)
+2. Copia env: `cp .env.example .env.local` e compila
+3. Scrivi in Cursor: **«Setup autonomia completato, procedi»**
+
+## Sviluppo (dopo env)
 
 ```bash
+npm install
+npx prisma migrate dev
+npm run db:seed   # dopo implementazione seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Pubblico: http://localhost:3000/recesso  
+- Admin: http://localhost:3000/admin  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentazione locale (non su Git)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `docs/AUTONOMIA.md` → punta all’harness
+- `docs/PREREQUISITI.md`
 
-## Learn More
+## Specifiche
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vedi documento sorgente: *Prompt per generare piattaforma* (Recesso Digitale Polizze — Fase 1).

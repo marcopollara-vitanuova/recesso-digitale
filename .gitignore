@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# Local agent docs (not for Git)
+docs/AUTONOMIA.md
+docs/PREREQUISITI.md
 
 # vercel
 .vercel
