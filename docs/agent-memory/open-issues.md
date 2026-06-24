@@ -33,6 +33,7 @@
 ## Altri
 - **Preview HTML editor** usa `dangerouslySetInnerHTML` con dati di esempio statici e variabili escaped: rischio basso (admin trusted). Tenere d'occhio.
 - **Staging deployato su Vercel**: non automatizzabile (token Vercel senza scope team). Istruzioni manuali in `staging.md`.
+- **Auto-deploy a volte in ritardo** (2026-06-24): un push a `main` non è stato raccolto da Vercel per >6 min. Workaround usato: commit vuoto `chore: trigger deployment` per ri-attivare il webhook. Non potendo usare la CLI Vercel (token senza scope team), il nudge via commit vuoto è il rimedio.
 
 ## Note dati / business
 - `secondaryEmails` è `Json?` sul modello compagnia: l'API valida `array<email>` e default `[]`. Verificare che l'invio usi davvero le secondary (attualmente `send.ts` invia al singolo `to`).
