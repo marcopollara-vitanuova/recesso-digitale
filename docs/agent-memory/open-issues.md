@@ -1,0 +1,34 @@
+# Open Issues & Rischi — Recesso Digitale Polizze
+
+> Backlog rischi e problemi aperti. Aggiornare quando emergono/risolvono.
+
+## Rischi infrastruttura
+- **Vercel deploy bloccato (2026-06-24)**: il `VERCEL_TOKEN` in env è un token personale (utente `marcopollara-vitanuova`) SENZA accesso al team/scope del progetto (`team_OYhBT52i0zi9RJqyAgbFe0hD`); le credenziali CLI memorizzate sono scadute ("token is not valid"). `vercel login` è interattivo → non eseguibile in autonomia. Mitigazione: (a) auto-deploy via integrazione GitHub→Vercel sul push a `main` (da verificare); (b) in alternativa l'utente esegue `vercel login` o fornisce un token con scope team. Verifica deploy via `curl` sul dominio prod (controllo contenuto aggiornato).
+- **Migrazioni DB manuali** — vanno applicate da locale (`db:migrate:deploy`); rischio di drift se dimenticate prima di un deploy che cambia schema.
+- **npm audit** — 3 vulnerabilità moderate transitive (postcss via next). Nessun fix non-breaking disponibile; monitorare upgrade Next.
+
+## Gap funzionali (UI) — RISOLTI 2026-06-24
+- ~~Compagnie UI sola lettura~~ → CRUD completo da UI (modale).
+- ~~Template email UI sola lettura~~ → editor con subject/bodyText/bodyHtml.
+- ~~Nessuna validazione placeholder~~ → validazione client+server (422 su variabili sconosciute).
+- ~~`bodyHtml` non usato in invio~~ → `send.ts` invia html quando presente (variabili escaped).
+- **Manca `GET /[id]`** per email-templates e insurance-companies (si lavora su lista + PUT). Non bloccante.
+
+## Nuovi rischi / da valutare
+- **Nessun DB di staging**: `.env.local` = DB di produzione. Test distruttivi vietati senza ambiente separato. (Vedi decisions.md.)
+- **secondaryEmails** ancora NON usate in invio (`send.ts` invia solo a `to`). L'editor compagnia le salva ma non vengono messe in CC. Da decidere se collegarle.
+- **Preview HTML editor** usa `dangerouslySetInnerHTML` con dati di esempio statici e variabili escaped: rischio basso (admin trusted, no input utente nel preview). Tenere d'occhio se si introducono dati dinamici.
+
+## Note dati / business
+- `secondaryEmails` è `Json?` sul modello compagnia: l'API valida `array<email>` e default `[]`. Verificare che l'invio usi davvero le secondary (attualmente `send.ts` invia al singolo `to`).
+- `internalCode` è `@unique` (opzionale): create/update devono gestire errore unicità (P2002) con messaggio chiaro.
+- Eliminazione "vera" compagnia: NON consentita se esistono `withdrawalRequests` collegate. Strategia adottata = soft delete (disable).
+
+## Qualità / test
+- Nessuna suite di test automatici presente (no Vitest/Playwright). Strategia test attuale = build + lint + smoke manuale.
+- Warning lint noti (non bloccanti): import inutilizzati in `email/send.ts`, `email/templates.ts`, `services/withdrawal.ts`; `form.watch()` react-hook-form non memoizzabile.
+
+## Sicurezza (da tenere d'occhio)
+- Tutte le scritture admin passano da `requireRole` + `canWrite` + audit: OK.
+- VIEWER può leggere via `requireSession` su GET admin: comportamento atteso, confermare con owner.
+- Rate limit pubblico per IP basato su conteggio `withdrawalRequest` per IP/ora: efficace ma legato al DB.
