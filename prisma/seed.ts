@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS: Array<{
   { key: "broker_email", value: "recessi@vitanuova.it", type: "string", description: "Email broker principale" },
   { key: "broker_cc_emails", value: "[]", type: "json", description: "Email broker in CC" },
   { key: "broker_bcc_emails", value: "[]", type: "json", description: "Email broker in BCC" },
-  { key: "email_from", value: "Recessi <onboarding@resend.dev>", type: "string", description: "Mittente email" },
+  { key: "email_from", value: "Vitanuova Recessi <recessi@updates.vitanuova.it>", type: "string", description: "Mittente email (dominio verificato Resend)" },
   { key: "email_reply_to", value: "assistenza@vitanuova.it", type: "string", description: "Reply-To" },
   { key: "privacy_policy_url", value: "https://www.vitanuova.it/privacy", type: "string", description: "URL informativa privacy" },
   { key: "public_form_enabled", value: "true", type: "boolean", description: "Form pubblico attivo" },

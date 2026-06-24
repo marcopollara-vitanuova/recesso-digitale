@@ -23,12 +23,16 @@
 - ~~Build intermittente per prerender admin con query DB~~ → pagine admin + `/recesso` `force-dynamic`.
 - Aggiunta suite E2E Playwright (`npm run test:e2e`) per i bug di interazione UI.
 
-## Resend — DA COMPLETARE (bloccante per invii reali)
-- **`EMAIL_FROM` = `onboarding@resend.dev`**: sender condiviso di test Resend, consegna ristretta
-  all'email del proprietario dell'account. Le email verso clienti/compagnie reali NON verranno
-  recapitate. Azione: verificare un dominio su Resend e impostare `EMAIL_FROM` su quel dominio.
-- **Dominio `updates.vitanuova.it` = `not_started`**: DNS non verificato. Azione: completare i
-  record DNS (SPF/DKIM) su Resend, poi attendere stato `verified`.
+## Resend — RISOLTO 2026-06-24
+- Dominio `updates.vitanuova.it` ora **verified** (sending enabled), DNS SPF/DKIM configurati dall'utente.
+- Mittente impostato su dominio verificato: `Vitanuova Recessi <recessi@updates.vitanuova.it>`.
+  - Setting DB `email_from` aggiornata in **produzione** (via API admin, tracciata in audit) e in staging.
+  - Allineati anche seed, fallback `settings.ts`, `.env.example`, `.env.local`, `.env.staging`.
+- Verificato invio reale: (a) test diretto API Resend OK; (b) **end-to-end attraverso l'app** su
+  staging (dry-run OFF, destinatari = titolare) → compagnia/cliente/broker tutti `SENT` via resend,
+  `status EMAIL_SENT`.
+- NOTA: l'env `EMAIL_FROM` su Vercel (Production) è ancora il vecchio valore ma è IRRILEVANTE
+  (la setting DB ha precedenza). Aggiornarlo se un giorno si rimuove la setting DB.
 
 ## Altri
 - **Preview HTML editor** usa `dangerouslySetInnerHTML` con dati di esempio statici e variabili escaped: rischio basso (admin trusted). Tenere d'occhio.

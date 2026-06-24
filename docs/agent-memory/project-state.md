@@ -49,7 +49,7 @@
 - Variabili template ammesse centralizzate in `src/lib/email/template-vars.ts` (modulo puro/condiviso).
 - Email alla compagnia: CC = broker + brokerCc + **secondaryEmails compagnia** (dedup), invio e reinvio.
 - Flag `EMAIL_DRY_RUN=true` → nessun invio reale (per staging/test). Default off in prod.
-- **Resend**: key valida ma NON ancora abilitato invio reale a terzi (from = onboarding@resend.dev, dominio non verificato). Vedi open-issues.
+- **Resend**: OPERATIVO. Dominio `updates.vitanuova.it` verificato; mittente `Vitanuova Recessi <recessi@updates.vitanuova.it>` (setting DB `email_from`). Invio reale verificato end-to-end. Pronto per test compliance verso cliente e compagnia.
 
 ### Ambiente staging
 - Schema Postgres `staging` (stesso progetto Supabase) + `.env.staging` + script `*:staging`. Vedi `staging.md`.

@@ -34,7 +34,7 @@ export async function getAppSettings(): Promise<AppSettings> {
     brokerEmail: map.broker_email ?? "recessi@example.com",
     brokerCcEmails: parseJsonArray(map.broker_cc_emails ?? "[]"),
     brokerBccEmails: parseJsonArray(map.broker_bcc_emails ?? "[]"),
-    emailFrom: map.email_from ?? process.env.EMAIL_FROM ?? "Recessi <onboarding@resend.dev>",
+    emailFrom: map.email_from ?? process.env.EMAIL_FROM ?? "Vitanuova Recessi <recessi@updates.vitanuova.it>",
     emailReplyTo: map.email_reply_to ?? process.env.EMAIL_REPLY_TO ?? "assistenza@example.com",
     privacyPolicyUrl: map.privacy_policy_url ?? "#",
     publicFormEnabled: (map.public_form_enabled ?? "true") === "true",

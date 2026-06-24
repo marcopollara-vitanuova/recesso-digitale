@@ -46,5 +46,12 @@
 - **Template email** — nessun bug reale lato utente: a velocità di digitazione umana funziona correttamente (verificato). Lo "scramble" visto inizialmente era un artefatto della digitazione ultra-rapida di Playwright su un campo molto lungo.
 - **Lezione test** — i test API (curl) non bastano per i bug di interazione UI (focus/cursore): servono test browser (Playwright) per le CTA/form.
 
+### [2026-06-24] Sessione 4 — Resend operativo
+- **Dominio Resend verificato** (`updates.vitanuova.it`) dopo configurazione DNS SPF/DKIM dell'utente.
+- **Mittente** impostato su `Vitanuova Recessi <recessi@updates.vitanuova.it>` (scelta: local-part `recessi`, display "Vitanuova Recessi"). Reply-To invariato (`assistenza@vitanuova.it`).
+- Il `from` runtime arriva dalla **setting DB `email_from`** (precedenza su env). Aggiornata in PROD via API admin (audit `UPDATE_SETTINGS`) e in staging. Seed/fallback/env allineati.
+- **Verifica invio reale**: test diretto API Resend + end-to-end via app su staging (dry-run OFF, destinatari = titolare) → tutti `SENT`, `status EMAIL_SENT`.
+- Produzione PRONTA per il test compliance (invio reale a cliente e compagnia).
+
 ### [2026-06-24] Lezione operativa critica
 - **`.env.local` punta al DB Supabase di PRODUZIONE** (non esiste un DB di staging/local). Qualsiasi test contro `localhost` che chiama API admin scrive su dati reali. I test QA di questa sessione hanno creato/modificato dati reali e sono stati **ripristinati** subito (compagnia di test eliminata, template `technical_alert` riportato a seed, audit log di test ripuliti). REGOLA: per test distruttivi futuri usare un DB separato o limitarsi a smoke non-distruttivi.
