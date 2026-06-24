@@ -14,10 +14,20 @@
 - ~~`bodyHtml` non usato in invio~~ → `send.ts` invia html quando presente (variabili escaped).
 - **Manca `GET /[id]`** per email-templates e insurance-companies (si lavora su lista + PUT). Non bloccante.
 
-## Nuovi rischi / da valutare
-- **Nessun DB di staging**: `.env.local` = DB di produzione. Test distruttivi vietati senza ambiente separato. (Vedi decisions.md.)
-- **secondaryEmails** ancora NON usate in invio (`send.ts` invia solo a `to`). L'editor compagnia le salva ma non vengono messe in CC. Da decidere se collegarle.
-- **Preview HTML editor** usa `dangerouslySetInnerHTML` con dati di esempio statici e variabili escaped: rischio basso (admin trusted, no input utente nel preview). Tenere d'occhio se si introducono dati dinamici.
+## Risolti 2026-06-24 (sessione 2)
+- ~~Nessun DB di staging~~ → schema `staging` + `EMAIL_DRY_RUN` (vedi `staging.md`).
+- ~~secondaryEmails non usate in invio~~ → ora in CC sull'email compagnia (invio + reinvio).
+
+## Resend — DA COMPLETARE (bloccante per invii reali)
+- **`EMAIL_FROM` = `onboarding@resend.dev`**: sender condiviso di test Resend, consegna ristretta
+  all'email del proprietario dell'account. Le email verso clienti/compagnie reali NON verranno
+  recapitate. Azione: verificare un dominio su Resend e impostare `EMAIL_FROM` su quel dominio.
+- **Dominio `updates.vitanuova.it` = `not_started`**: DNS non verificato. Azione: completare i
+  record DNS (SPF/DKIM) su Resend, poi attendere stato `verified`.
+
+## Altri
+- **Preview HTML editor** usa `dangerouslySetInnerHTML` con dati di esempio statici e variabili escaped: rischio basso (admin trusted). Tenere d'occhio.
+- **Staging deployato su Vercel**: non automatizzabile (token Vercel senza scope team). Istruzioni manuali in `staging.md`.
 
 ## Note dati / business
 - `secondaryEmails` è `Json?` sul modello compagnia: l'API valida `array<email>` e default `[]`. Verificare che l'invio usi davvero le secondary (attualmente `send.ts` invia al singolo `to`).

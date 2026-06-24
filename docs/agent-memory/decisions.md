@@ -33,5 +33,11 @@
 - **Validazione placeholder** — set unico `ALLOWED_TEMPLATE_VARS` in `lib/email/template-vars.ts` (modulo PURO, client-safe, niente Prisma). `PUT` template rifiuta variabili sconosciute → HTTP 422 `INVALID_PLACEHOLDER`. Validazione speculare anche lato client (blocca Salva).
 - **Niente migrazioni DB** — nessuna modifica schema; usato `bodyHtml` già esistente.
 
+### [2026-06-24] Sessione 2 — Email CC, dry-run, staging
+- **secondaryEmails compagnia in CC** — l'email alla compagnia (sia invio iniziale sia reinvio) ora include in CC le `secondaryEmails` della compagnia, oltre a broker + brokerCc. Dedup case-insensitive ed esclusione del destinatario principale. Niente schema change: si usano i dati correnti della compagnia (le secondary sono routing operativo, non dato legale; la `withdrawalEmail` resta snapshottata sulla richiesta).
+- **`EMAIL_DRY_RUN`** — nuovo flag env: se `true`, `send.ts` NON chiama Resend ma registra l'`EmailLog` come `SENT` (provider `dry-run`). Default off (prod invia davvero). Serve per test sicuri.
+- **Staging via schema dedicato** — scelto schema Postgres `staging` nello stesso progetto Supabase + `EMAIL_DRY_RUN` invece di un progetto separato. Motivo: free, autonomo, isolamento dati sufficiente per i test. `DIRECT_URL` via session pooler (5432) perché l'host diretto legacy non è raggiungibile. Dettagli in `staging.md`.
+- **Verifica Resend** — API key valida. CRITICITÀ: `EMAIL_FROM` usa `onboarding@resend.dev` (sender di test, consegna ristretta al proprietario account) e il dominio `updates.vitanuova.it` è `not_started` (DNS non verificato). Invio reale verso terzi NON operativo finché non si verifica un dominio e si imposta un `EMAIL_FROM` su quel dominio.
+
 ### [2026-06-24] Lezione operativa critica
 - **`.env.local` punta al DB Supabase di PRODUZIONE** (non esiste un DB di staging/local). Qualsiasi test contro `localhost` che chiama API admin scrive su dati reali. I test QA di questa sessione hanno creato/modificato dati reali e sono stati **ripristinati** subito (compagnia di test eliminata, template `technical_alert` riportato a seed, audit log di test ripuliti). REGOLA: per test distruttivi futuri usare un DB separato o limitarsi a smoke non-distruttivi.

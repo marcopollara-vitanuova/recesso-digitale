@@ -47,6 +47,13 @@
 ### Note tecniche email
 - Invio email supporta `text` sempre + `html` se il template ha `bodyHtml`. Variabili HTML escaped.
 - Variabili template ammesse centralizzate in `src/lib/email/template-vars.ts` (modulo puro/condiviso).
+- Email alla compagnia: CC = broker + brokerCc + **secondaryEmails compagnia** (dedup), invio e reinvio.
+- Flag `EMAIL_DRY_RUN=true` → nessun invio reale (per staging/test). Default off in prod.
+- **Resend**: key valida ma NON ancora abilitato invio reale a terzi (from = onboarding@resend.dev, dominio non verificato). Vedi open-issues.
+
+### Ambiente staging
+- Schema Postgres `staging` (stesso progetto Supabase) + `.env.staging` + script `*:staging`. Vedi `staging.md`.
+- DB di produzione = schema `public`; `.env.local` punta a `public` (prod).
 
 ## Modelli DB (Prisma)
 User, InsuranceCompany, WithdrawalRequest, EmailLog, Setting, EmailTemplate, AuditLog, InternalNote
