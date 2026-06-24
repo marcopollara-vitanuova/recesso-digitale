@@ -7,10 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getAppSettings } from "@/lib/settings";
 import { generatePublicRequestId } from "@/lib/public-id";
 import { isRateLimited } from "@/lib/rate-limit";
-import {
-  buildTemplateVars,
-  getRenderedTemplate,
-} from "@/lib/email/templates";
+import { buildTemplateVars } from "@/lib/email/templates";
 import { computeRequestStatus, sendTemplatedEmail } from "@/lib/email/send";
 import type { WithdrawalRequestInput } from "@/lib/validations/withdrawal";
 

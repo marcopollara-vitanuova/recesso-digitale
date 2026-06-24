@@ -1,14 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { formatDateTimeEmail } from "@/lib/datetime";
-import type { WithdrawalRequest, InsuranceCompany } from "@prisma/client";
+import type { WithdrawalRequest } from "@prisma/client";
+import { renderTemplate, type TemplateVars } from "@/lib/email/template-vars";
+
+export type { TemplateVars } from "@/lib/email/template-vars";
+export {
+  ALLOWED_TEMPLATE_VARS,
+  findUnknownPlaceholders,
+  renderTemplate as renderPreview,
+} from "@/lib/email/template-vars";
 
 export type TemplateKey =
   | "insurance_company_withdrawal"
   | "customer_confirmation"
   | "broker_notification"
   | "technical_alert";
-
-export type TemplateVars = Record<string, string>;
 
 const FALLBACK: Record<TemplateKey, { subject: string; body: string }> = {
   insurance_company_withdrawal: {
@@ -50,20 +56,21 @@ export function buildTemplateVars(
   };
 }
 
-function render(template: string, vars: TemplateVars): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => vars[key] ?? "");
-}
-
 export async function getRenderedTemplate(
   templateKey: TemplateKey,
   vars: TemplateVars,
-): Promise<{ subject: string; body: string }> {
+): Promise<{ subject: string; body: string; html?: string }> {
   const row = await prisma.emailTemplate.findUnique({ where: { templateKey } });
+  const useDb = Boolean(row?.isActive);
   const fallback = FALLBACK[templateKey];
-  const subjectTpl = row?.isActive ? row.subject : fallback.subject;
-  const bodyTpl = row?.isActive ? row.bodyText : fallback.body;
+
+  const subjectTpl = useDb ? row!.subject : fallback.subject;
+  const bodyTpl = useDb ? row!.bodyText : fallback.body;
+  const htmlTpl = useDb ? row!.bodyHtml : null;
+
   return {
-    subject: render(subjectTpl, vars),
-    body: render(bodyTpl, vars),
+    subject: renderTemplate(subjectTpl, vars),
+    body: renderTemplate(bodyTpl, vars),
+    html: htmlTpl ? renderTemplate(htmlTpl, vars, "html") : undefined,
   };
 }

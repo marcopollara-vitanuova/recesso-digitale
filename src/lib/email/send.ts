@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { EmailStatus, EmailType, type Prisma } from "@prisma/client";
+import { EmailStatus, EmailType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getRenderedTemplate, type TemplateKey, type TemplateVars } from "@/lib/email/templates";
 
@@ -18,7 +18,7 @@ type SendParams = {
 };
 
 export async function sendTemplatedEmail(params: SendParams): Promise<{ ok: boolean; logId: string }> {
-  const { subject, body } = await getRenderedTemplate(params.templateKey, params.vars);
+  const { subject, body, html } = await getRenderedTemplate(params.templateKey, params.vars);
 
   const log = await prisma.emailLog.create({
     data: {
@@ -43,6 +43,7 @@ export async function sendTemplatedEmail(params: SendParams): Promise<{ ok: bool
       replyTo: params.replyTo,
       subject,
       text: body,
+      ...(html ? { html } : {}),
     });
 
     if (result.error) {
