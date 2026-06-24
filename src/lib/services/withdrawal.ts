@@ -21,6 +21,29 @@ export class WithdrawalServiceError extends Error {
   }
 }
 
+/** Normalizza un valore Json (atteso array di stringhe) in lista di email. */
+function parseEmailList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((v): v is string => typeof v === "string")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+/** Rimuove duplicati (case-insensitive) ed esclude l'indirizzo principale. */
+function dedupeEmails(emails: string[], exclude?: string): string[] {
+  const seen = new Set<string>();
+  const excluded = exclude?.trim().toLowerCase();
+  const result: string[] = [];
+  for (const email of emails) {
+    const norm = email.trim().toLowerCase();
+    if (!norm || norm === excluded || seen.has(norm)) continue;
+    seen.add(norm);
+    result.push(email.trim());
+  }
+  return result;
+}
+
 export async function createWithdrawalRequest(
   input: WithdrawalRequestInput,
   meta: { ip?: string; userAgent?: string },
@@ -93,13 +116,17 @@ export async function createWithdrawalRequest(
   const ccBroker = [settings.brokerEmail, ...settings.brokerCcEmails].filter(Boolean);
   const bcc = settings.brokerBccEmails;
 
+  // Email secondarie della compagnia in CC sull'email alla compagnia.
+  const companySecondary = parseEmailList(company.secondaryEmails);
+  const companyCc = dedupeEmails([...ccBroker, ...companySecondary], company.withdrawalEmail);
+
   const companyResult = await sendTemplatedEmail({
     withdrawalRequestId: request.id,
     emailType: EmailType.TO_INSURANCE_COMPANY,
     templateKey: "insurance_company_withdrawal",
     vars,
     to: company.withdrawalEmail,
-    cc: ccBroker,
+    cc: companyCc,
     bcc,
     from: settings.emailFrom,
     replyTo: settings.emailReplyTo,
@@ -155,13 +182,24 @@ export async function resendCompanyEmail(requestId: string, userId: string) {
   const settings = await getAppSettings();
   const request = await prisma.withdrawalRequest.findUniqueOrThrow({ where: { id: requestId } });
   const vars = buildTemplateVars(request, settings);
+
+  // Recupera le email secondarie correnti della compagnia (se ancora esistente).
+  const company = await prisma.insuranceCompany.findUnique({
+    where: { id: request.insuranceCompanyId },
+    select: { secondaryEmails: true },
+  });
+  const companyCc = dedupeEmails(
+    [settings.brokerEmail, ...parseEmailList(company?.secondaryEmails)],
+    request.insuranceCompanyEmailSnapshot,
+  );
+
   const result = await sendTemplatedEmail({
     withdrawalRequestId: request.id,
     emailType: EmailType.TO_INSURANCE_COMPANY,
     templateKey: "insurance_company_withdrawal",
     vars,
     to: request.insuranceCompanyEmailSnapshot,
-    cc: [settings.brokerEmail],
+    cc: companyCc,
     from: settings.emailFrom,
     replyTo: settings.emailReplyTo,
   });

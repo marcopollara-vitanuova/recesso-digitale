@@ -5,6 +5,13 @@ import { getRenderedTemplate, type TemplateKey, type TemplateVars } from "@/lib/
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+/**
+ * In modalità dry-run (es. staging/test) non viene effettuata alcuna chiamata
+ * reale a Resend: l'EmailLog viene comunque registrato come inviato per poter
+ * verificare destinatari, CC e contenuto in sicurezza.
+ */
+const EMAIL_DRY_RUN = process.env.EMAIL_DRY_RUN === "true";
+
 type SendParams = {
   withdrawalRequestId: string;
   emailType: EmailType;
@@ -33,6 +40,19 @@ export async function sendTemplatedEmail(params: SendParams): Promise<{ ok: bool
       status: EmailStatus.PENDING,
     },
   });
+
+  if (EMAIL_DRY_RUN) {
+    await prisma.emailLog.update({
+      where: { id: log.id },
+      data: {
+        status: EmailStatus.SENT,
+        provider: "dry-run",
+        providerMessageId: "dry-run",
+        sentAt: new Date(),
+      },
+    });
+    return { ok: true, logId: log.id };
+  }
 
   try {
     const result = await resend.emails.send({
