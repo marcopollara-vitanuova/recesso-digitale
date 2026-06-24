@@ -39,5 +39,12 @@
 - **Staging via schema dedicato** — scelto schema Postgres `staging` nello stesso progetto Supabase + `EMAIL_DRY_RUN` invece di un progetto separato. Motivo: free, autonomo, isolamento dati sufficiente per i test. `DIRECT_URL` via session pooler (5432) perché l'host diretto legacy non è raggiungibile. Dettagli in `staging.md`.
 - **Verifica Resend** — API key valida. CRITICITÀ: `EMAIL_FROM` usa `onboarding@resend.dev` (sender di test, consegna ristretta al proprietario account) e il dominio `updates.vitanuova.it` è `not_started` (DNS non verificato). Invio reale verso terzi NON operativo finché non si verifica un dominio e si imposta un `EMAIL_FROM` su quel dominio.
 
+### [2026-06-24] Sessione 3 — Fix UI admin, rendering dinamico, E2E
+- **Bug Modal (Compagnie) RISOLTO** — l'effetto di gestione focus dipendeva da `onClose`, ricreato a ogni render: a ogni carattere digitato il focus tornava sulla X. Fix: `onClose` via ref stabile, effetto dipendente SOLO da `open`, focus iniziale sul primo campo del form (non sulla X). Verificato in browser (Playwright).
+- **Pagine admin + `/recesso` → `force-dynamic`** — prima erano prerenderizzate staticamente ed eseguivano query Prisma al BUILD: fragile (fallimento build intermittente se il DB è lento/irraggiungibile) e dati non freschi. Ora rese dinamiche: build robuste (no DB al build) e dati per-richiesta. Importante per l'affidabilità dell'auto-deploy.
+- **Suite E2E Playwright** — aggiunta `tests/admin-ui.spec.ts` + `playwright.config.ts` + script `test:e2e`. Verifica reale del focus/digitazione e del salvataggio. `tsconfig` esclude `tests`/`playwright.config.ts` dal typecheck Next.
+- **Template email** — nessun bug reale lato utente: a velocità di digitazione umana funziona correttamente (verificato). Lo "scramble" visto inizialmente era un artefatto della digitazione ultra-rapida di Playwright su un campo molto lungo.
+- **Lezione test** — i test API (curl) non bastano per i bug di interazione UI (focus/cursore): servono test browser (Playwright) per le CTA/form.
+
 ### [2026-06-24] Lezione operativa critica
 - **`.env.local` punta al DB Supabase di PRODUZIONE** (non esiste un DB di staging/local). Qualsiasi test contro `localhost` che chiama API admin scrive su dati reali. I test QA di questa sessione hanno creato/modificato dati reali e sono stati **ripristinati** subito (compagnia di test eliminata, template `technical_alert` riportato a seed, audit log di test ripuliti). REGOLA: per test distruttivi futuri usare un DB separato o limitarsi a smoke non-distruttivi.

@@ -18,6 +18,11 @@
 - ~~Nessun DB di staging~~ → schema `staging` + `EMAIL_DRY_RUN` (vedi `staging.md`).
 - ~~secondaryEmails non usate in invio~~ → ora in CC sull'email compagnia (invio + reinvio).
 
+## Risolti 2026-06-24 (sessione 3)
+- ~~Modal Compagnie rubava il focus a ogni digitazione~~ → fix gestione focus (verificato in browser).
+- ~~Build intermittente per prerender admin con query DB~~ → pagine admin + `/recesso` `force-dynamic`.
+- Aggiunta suite E2E Playwright (`npm run test:e2e`) per i bug di interazione UI.
+
 ## Resend — DA COMPLETARE (bloccante per invii reali)
 - **`EMAIL_FROM` = `onboarding@resend.dev`**: sender condiviso di test Resend, consegna ristretta
   all'email del proprietario dell'account. Le email verso clienti/compagnie reali NON verranno

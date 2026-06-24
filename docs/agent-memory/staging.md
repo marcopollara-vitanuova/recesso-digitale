@@ -48,6 +48,25 @@ staging deployato:
    - `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`
 3. (Facoltativo) eseguire `db:migrate:staging` prima del primo deploy.
 
+## Test E2E (Playwright)
+- Suite in `tests/admin-ui.spec.ts`, config `playwright.config.ts` (browser Chromium).
+- Verifica reale in browser: focus che resta nel campo durante la digitazione (Compagnie),
+  persistenza modifiche, editor Template.
+- Comando: `npm run test:e2e`. Playwright avvia da sé `dev:staging` se non già attivo.
+- ⚠️ Il dev server (Turbopack) compila le rotte alla prima richiesta: a freddo i test possono
+  essere lenti. **Best practice**: avviare `npm run dev:staging`, scaldare le rotte admin con
+  qualche richiesta, poi lanciare `npm run test:e2e` (riusa il server già attivo → veloce e stabile).
+- Le credenziali admin per il login vengono lette da `.env.staging`.
+
+## Pipeline test → rilascio (attuale)
+1. **Sviluppo**: modifiche locali; per provarle in sicurezza usare lo staging
+   (`npm run dev:staging`, DB schema `staging`, email in dry-run).
+2. **Qualità locale**: `npm run lint`, `npm run build`, `npm run test:e2e` (verde).
+3. **Commit atomici** + push su `main`.
+4. **Auto-deploy**: l'integrazione GitHub→Vercel deploya `main` in produzione automaticamente.
+5. **Verifica produzione**: stato deploy via `gh api .../deployments` + smoke non distruttivi su
+   `https://recesso.vitanuova.it`.
+
 ## Upgrade futuro (isolamento infrastrutturale completo)
 Se serve separazione a livello di istanza (non solo schema): creare un progetto Supabase
 dedicato `recesso-digitale-staging` (`supabase projects create`, CLI già autenticata) — valutare
