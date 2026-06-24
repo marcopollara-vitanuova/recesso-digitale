@@ -18,7 +18,8 @@
     "db:migrate:staging": "dotenv -e .env.staging -- prisma migrate deploy",
     "db:push:staging": "dotenv -e .env.staging -- prisma db push",
     "db:seed:staging": "dotenv -e .env.staging -- prisma db seed",
-    "db:studio:staging": "dotenv -e .env.staging -- prisma studio"
+    "db:studio:staging": "dotenv -e .env.staging -- prisma studio",
+    "test:e2e": "playwright test"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -42,6 +43,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
