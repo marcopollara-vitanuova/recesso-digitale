@@ -34,6 +34,10 @@ export const metadata: Metadata = {
   },
 };
 
+// Legge impostazioni/compagnie modificabili dall'admin: rendering per-richiesta
+// (riflette subito le modifiche) ed evita query al DB durante la build.
+export const dynamic = "force-dynamic";
+
 export default async function RecessoPage() {
   const settings = await getAppSettings();
 

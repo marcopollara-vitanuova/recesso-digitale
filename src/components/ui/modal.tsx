@@ -13,6 +13,13 @@ type ModalProps = {
 
 export function Modal({ open, onClose, title, description, children, footer }: ModalProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
+  // Riferimento stabile a onClose: evita di ri-eseguire l'effetto (e rubare il
+  // focus) a ogni render del genitore mentre l'utente digita.
+  const onCloseRef = React.useRef(onClose);
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   const titleId = React.useId();
   const descId = React.useId();
 
@@ -20,10 +27,11 @@ export function Modal({ open, onClose, title, description, children, footer }: M
     if (!open) return;
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key === "Tab" && panelRef.current) {
@@ -45,10 +53,12 @@ export function Modal({ open, onClose, title, description, children, footer }: M
 
     document.addEventListener("keydown", onKeyDown);
     document.body.style.overflow = "hidden";
-    // Focus primo elemento interattivo del pannello
-    const toFocus = panelRef.current?.querySelector<HTMLElement>(
-      'input, textarea, select, button, [tabindex]:not([tabindex="-1"])',
-    );
+
+    // Focus iniziale: primo campo del form (non il bottone di chiusura).
+    const panel = panelRef.current;
+    const toFocus =
+      panel?.querySelector<HTMLElement>("input, textarea, select") ??
+      panel?.querySelector<HTMLElement>("button");
     toFocus?.focus();
 
     return () => {
@@ -56,7 +66,9 @@ export function Modal({ open, onClose, title, description, children, footer }: M
       document.body.style.overflow = "";
       previouslyFocused?.focus();
     };
-  }, [open, onClose]);
+    // Dipende SOLO da `open`: non deve ri-eseguirsi quando cambia onClose o lo stato del form
+    // (onClose è letto tramite ref). Questo evita il furto del focus a ogni digitazione.
+  }, [open]);
 
   if (!open) return null;
 
@@ -64,7 +76,7 @@ export function Modal({ open, onClose, title, description, children, footer }: M
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 py-10"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) onCloseRef.current();
       }}
     >
       <div
@@ -88,7 +100,7 @@ export function Modal({ open, onClose, title, description, children, footer }: M
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => onCloseRef.current()}
             aria-label="Chiudi finestra"
             className="rounded-lg p-1 text-[var(--gray-500)] hover:bg-[var(--gray-100)] hover:text-[var(--gray-900)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary-400)]"
           >
