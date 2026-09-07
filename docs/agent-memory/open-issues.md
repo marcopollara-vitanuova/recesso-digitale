@@ -96,8 +96,10 @@ Conferma puntuale del `suppressed` possibile solo via Resend (retention limitata
 - **`onsalute@pec.it` suppressed** (bounce dal 29/07): invii verso quella PEC compagnia bloccati; verificare con la compagnia prima di riattivare.
 - **Verificare che `clienti@vitanuova.it` consegni davvero** (lo confermerà il webhook al prossimo invio).
 - **Ruotare credenziali admin** (`recesso.vitanuova.it/admin/login`): circolate in un thread email del 24/06 (handoff §6.1).
-- **`VERCEL_TOKEN` in env è invalido**: rimuoverlo/rigenerarlo; per ora i comandi vercel funzionano con la sessione CLI (login effettuato).
-- **Staging su Vercel**: ora possibile (ho accesso) — da decidere se procedere.
+- **`VERCEL_TOKEN`**: era invalido → **commentato in `~/.zshrc`** (riga export, backup `~/.zshrc.bak-*`). La CLI ora usa la sessione di login (`env -u VERCEL_TOKEN vercel ...`). Per autonomia token-based futura: creare un nuovo token da https://vercel.com/account/tokens e reinserirlo in `~/.zshrc` (la CLI non crea token).
+- **Staging su Vercel**: ✅ FATTO — https://recesso-digitale-staging.vercel.app (env Preview con schema `staging` + dry-run; protetto SSO team). Aggiornamento manuale via `vercel deploy` + `vercel alias` (vedi `staging.md`).
+- **Invii suppression-aware**: ✅ FATTO — CC/BCC soppressi rimossi; `to` soppresso → EmailLog `SUPPRESSED` (non più falso `SENT`).
+- **Snapshot suppression** loggata in `audit_logs` (`SUPPRESSION_SNAPSHOT`): `recessi@vitanuova.it`, `onsalute@pec.it`.
 
 ## Sicurezza (da tenere d'occhio)
 - Tutte le scritture admin passano da `requireRole` + `canWrite` + audit: OK.

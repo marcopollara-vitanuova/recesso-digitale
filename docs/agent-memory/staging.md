@@ -36,7 +36,16 @@ staging, altrimenti vince l'ambiente della shell.
 3. Eseguire i test contro `http://localhost:3030` (CRUD, submit, ecc.) — sicuri.
 4. Le email non partono (dry-run); verificare i CC/destinatari leggendo `EmailLog` su staging.
 
-## Deploy di uno staging su Vercel (richiede accesso team — TODO utente)
+## Staging deployato su Vercel (2026-09-07) — ATTIVO
+- URL stabile: **https://recesso-digitale-staging.vercel.app** (protetto da Vercel SSO: accesso solo team — apribile da browser loggato).
+- Env **Preview** configurate su Vercel (DATABASE_URL/DIRECT_URL con `schema=staging`, `EMAIL_DRY_RUN=true`, AUTH/NEXTAUTH secret, URL = alias staging, RESEND_API_KEY, EMAIL_FROM/REPLY_TO).
+- Il progetto NON fa auto-deploy dei branch: per aggiornare lo staging deployato:
+  1. `env -u VERCEL_TOKEN vercel deploy` (preview, usa le env Preview)
+  2. `env -u VERCEL_TOKEN vercel alias set <deployment-url> recesso-digitale-staging.vercel.app`
+- Esiste anche il branch remoto `staging` (per PR/diff).
+- NOTA: usare sempre `env -u VERCEL_TOKEN` finché non si rigenera un token valido (quello in `~/.zshrc` è stato commentato perché invalido).
+
+## Deploy di uno staging su Vercel (storico — ora attivo, vedi sopra)
 Non automatizzabile dall'agente (token Vercel personale, senza scope team). Per avere uno
 staging deployato:
 1. Creare un branch `staging` (auto-deploy Preview via integrazione GitHub→Vercel).
