@@ -25,7 +25,13 @@
 
 ## Rischi infrastruttura
 - **Vercel deploy bloccato (2026-06-24)**: il `VERCEL_TOKEN` in env è un token personale (utente `marcopollara-vitanuova`) SENZA accesso al team/scope del progetto (`team_OYhBT52i0zi9RJqyAgbFe0hD`); le credenziali CLI memorizzate sono scadute ("token is not valid"). `vercel login` è interattivo → non eseguibile in autonomia. Mitigazione: (a) auto-deploy via integrazione GitHub→Vercel sul push a `main` (da verificare); (b) in alternativa l'utente esegue `vercel login` o fornisce un token con scope team. Verifica deploy via `curl` sul dominio prod (controllo contenuto aggiornato).
-- **Migrazioni DB manuali** — vanno applicate da locale (`db:migrate:deploy`); rischio di drift se dimenticate prima di un deploy che cambia schema.
+- **Migrazioni DB manuali** — vanno applicate da locale; NON girano nel build Vercel.
+  **Ordine corretto per migrazioni additive (es. nuovi valori enum EmailStatus del webhook):**
+  1) `npm run db:migrate:staging` → poi la stessa migrazione su **prod** (`db:migrate:deploy`, `.env.local` = schema `public` di prod);
+  2) commit + push del codice (auto-deploy).
+  Migrare PRIMA del deploy del codice: se il codice nuovo va live prima, scrive valori enum non
+  ancora esistenti → route in 500 e retry Svix a vuoto. La migrazione additiva è sicura da applicare
+  prima (il codice vecchio non usa i valori nuovi). (Correzione ordine segnalata dall'agente Resend.)
 - **npm audit** — 3 vulnerabilità moderate transitive (postcss via next). Nessun fix non-breaking disponibile; monitorare upgrade Next.
 
 ## Gap funzionali (UI) — RISOLTI 2026-06-24

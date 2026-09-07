@@ -106,12 +106,12 @@ export function RecessoFlow({ privacyUrl }: { privacyUrl: string }) {
           </CardHeader>
           <CardContent className="space-y-4 text-[var(--gray-700)]">
             <p>
-              Questa pagina è dedicata esclusivamente alla richiesta di recesso, che può essere effettuata{" "}
-              <strong>entro 14 giorni</strong> dall&apos;acquisto della polizza.
+              Questa pagina è dedicata esclusivamente alla richiesta di recesso, che può essere effettuata
+              entro 14 giorni dall&apos;acquisto della polizza.
             </p>
             <p>
-              Se invece vuoi disdire la polizza, dovrai inviare la richiesta tramite{" "}
-              <strong>raccomandata A/R o PEC</strong> almeno <strong>60 giorni</strong> prima della scadenza.
+              Se invece vuoi disdire la polizza, dovrai inviare la richiesta tramite raccomandata A/R o PEC
+              almeno 60 giorni prima della scadenza.
             </p>
             <p>
               Cliccando sul pulsante qui sotto potrai avviare la procedura online per richiedere il recesso da una
