@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { withdrawalRequestSchema, type WithdrawalRequestInput } from "@/lib/validations/withdrawal";
@@ -26,6 +27,7 @@ function fieldError(
 }
 
 export function RecessoFlow({ privacyUrl }: { privacyUrl: string }) {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("landing");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [submitError, setSubmitError] = useState("");
@@ -164,7 +166,7 @@ export function RecessoFlow({ privacyUrl }: { privacyUrl: string }) {
                 Riceverai un&apos;email di conferma all&apos;indirizzo indicato.
               </p>
             </div>
-            <Button variant="secondary" onClick={() => (window.location.href = "/")}>
+            <Button variant="secondary" onClick={() => router.push("/")}>
               Torna alla homepage
             </Button>
           </CardContent>
@@ -197,7 +199,7 @@ export function RecessoFlow({ privacyUrl }: { privacyUrl: string }) {
                 Modifica dati
               </Button>
               {result?.publicId && (
-                <Button onClick={() => (window.location.href = "/")}>Torna alla homepage</Button>
+                <Button onClick={() => router.push("/")}>Torna alla homepage</Button>
               )}
             </div>
           </CardContent>
