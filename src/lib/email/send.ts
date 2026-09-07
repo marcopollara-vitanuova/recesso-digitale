@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { EmailStatus, EmailType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getRenderedTemplate, type TemplateKey, type TemplateVars } from "@/lib/email/templates";
+import { fetchSuppressedEmails, planRecipients } from "@/lib/email/suppression";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -27,13 +28,21 @@ type SendParams = {
 export async function sendTemplatedEmail(params: SendParams): Promise<{ ok: boolean; logId: string }> {
   const { subject, body, html } = await getRenderedTemplate(params.templateKey, params.vars);
 
+  // Suppression-aware: rimuove i destinatari soppressi da CC/BCC (evita che un
+  // indirizzo guasto faccia sopprimere l'intero messaggio) e rileva se il
+  // destinatario principale è soppresso. Saltato in dry-run.
+  const suppressed = EMAIL_DRY_RUN
+    ? new Set<string>()
+    : await fetchSuppressedEmails(process.env.RESEND_API_KEY);
+  const plan = planRecipients(params.to, params.cc, params.bcc, suppressed);
+
   const log = await prisma.emailLog.create({
     data: {
       withdrawalRequestId: params.withdrawalRequestId,
       emailType: params.emailType,
       recipientTo: params.to,
-      recipientCc: params.cc?.join(", ") ?? null,
-      recipientBcc: params.bcc?.join(", ") ?? null,
+      recipientCc: plan.cc.length ? plan.cc.join(", ") : null,
+      recipientBcc: plan.bcc.length ? plan.bcc.join(", ") : null,
       subject,
       body,
       provider: "resend",
@@ -54,12 +63,26 @@ export async function sendTemplatedEmail(params: SendParams): Promise<{ ok: bool
     return { ok: true, logId: log.id };
   }
 
+  // Destinatario principale soppresso: non inviare e segnalare il fallimento
+  // (in passato risultava erroneamente "SENT" pur non essendo mai partita).
+  if (plan.toSuppressed) {
+    await prisma.emailLog.update({
+      where: { id: log.id },
+      data: {
+        status: EmailStatus.SUPPRESSED,
+        errorMessage:
+          "Destinatario in suppression list Resend (bounce precedente): email non inviata. Verificare la casella della compagnia/destinatario.",
+      },
+    });
+    return { ok: false, logId: log.id };
+  }
+
   try {
     const result = await resend.emails.send({
       from: params.from,
       to: [params.to],
-      cc: params.cc,
-      bcc: params.bcc,
+      cc: plan.cc.length ? plan.cc : undefined,
+      bcc: plan.bcc.length ? plan.bcc : undefined,
       replyTo: params.replyTo,
       subject,
       text: body,
