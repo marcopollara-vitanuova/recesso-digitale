@@ -35,6 +35,10 @@ enum EmailStatus {
   SENT
   FAILED
   RETRYING
+  DELIVERED
+  BOUNCED
+  COMPLAINED
+  SUPPRESSED
 }
 
 model User {
