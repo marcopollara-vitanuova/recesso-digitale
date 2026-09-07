@@ -2,6 +2,27 @@
 
 > Backlog rischi e problemi aperti. Aggiornare quando emergono/risolvono.
 
+## Risolti 2026-09-07 (sessione 5)
+- ~~Manca `GET /[id]` compagnie/template~~ → aggiunti (401/404 coerenti).
+- ~~Nessun unit test~~ → suite `node:test` via `tsx` (`npm run test:unit`), zero nuove dipendenze.
+- ~~npm audit: next-auth CRITICO~~ → risolto (`npm audit fix`).
+- ~~npm audit: postcss/sharp/next HIGH~~ → risolti con **Next 16.3.4** (+ eslint-config-next 16.3.4).
+- Copy landing `/recesso` aggiornata (VB-339) — live in produzione.
+
+### Residui noti (accettati)
+- **npm audit: 3 HIGH solo dev-tooling Prisma CLI** (`prisma`, `@prisma/config`, `deepmerge-ts`).
+  `@prisma/client` (runtime) è pulito. Il fix suggerito da npm è un downgrade assurdo (6.12.0); il
+  fix reale sarebbe Prisma 7, deliberatamente evitato. Rivalutare all'eventuale upgrade a Prisma 7.
+- Lint: 1 warning non eliminabile (`form.watch()` react-hook-form / React Compiler).
+
+### ⚠️ Da escalare all'IT (scoperta agente Resend, 2026-09-07)
+- **`recessi@vitanuova.it` bounce PERMANENTE** su Exchange (test reale: `bounced_permanent`,
+  `delivered:0`; probabile `550 5.1.1` casella inesistente o `550 5.7.135` mittente esterno bloccato
+  sul gruppo). È il `broker_email` (destinatario notifica broker + CC email compagnia): **le notifiche
+  broker non vengono recapitate**. Resend ha ri-suppressato l'indirizzo. Azione: correggere la casella/
+  policy Exchange, oppure impostare un `broker_email` funzionante. Finché non risolto, resta in
+  suppression list (corretto non rimuoverlo).
+
 ## Rischi infrastruttura
 - **Vercel deploy bloccato (2026-06-24)**: il `VERCEL_TOKEN` in env è un token personale (utente `marcopollara-vitanuova`) SENZA accesso al team/scope del progetto (`team_OYhBT52i0zi9RJqyAgbFe0hD`); le credenziali CLI memorizzate sono scadute ("token is not valid"). `vercel login` è interattivo → non eseguibile in autonomia. Mitigazione: (a) auto-deploy via integrazione GitHub→Vercel sul push a `main` (da verificare); (b) in alternativa l'utente esegue `vercel login` o fornisce un token con scope team. Verifica deploy via `curl` sul dominio prod (controllo contenuto aggiornato).
 - **Migrazioni DB manuali** — vanno applicate da locale (`db:migrate:deploy`); rischio di drift se dimenticate prima di un deploy che cambia schema.
