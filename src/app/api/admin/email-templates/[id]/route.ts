@@ -1,9 +1,21 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireRole, canWrite } from "@/lib/auth";
+import { requireSession, requireRole, canWrite } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
 import { jsonError, jsonOk } from "@/lib/api";
 import { findUnknownPlaceholders } from "@/lib/email/templates";
+
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await requireSession();
+    const { id } = await params;
+    const template = await prisma.emailTemplate.findUnique({ where: { id } });
+    if (!template) return jsonError("Template non trovato", 404, "NOT_FOUND");
+    return jsonOk(template);
+  } catch {
+    return jsonError("Non autorizzato", 401);
+  }
+}
 
 const templateSchema = z.object({
   name: z.string().trim().min(1).optional(),

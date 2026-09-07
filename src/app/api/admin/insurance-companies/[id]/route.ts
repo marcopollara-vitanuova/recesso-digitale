@@ -1,9 +1,21 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireRole, canWrite } from "@/lib/auth";
+import { requireSession, requireRole, canWrite } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
 import { jsonError, jsonOk } from "@/lib/api";
+
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await requireSession();
+    const { id } = await params;
+    const company = await prisma.insuranceCompany.findUnique({ where: { id } });
+    if (!company) return jsonError("Compagnia non trovata", 404, "NOT_FOUND");
+    return jsonOk(company);
+  } catch {
+    return jsonError("Non autorizzato", 401);
+  }
+}
 
 const companySchema = z.object({
   legalName: z.string().trim().min(1).optional(),

@@ -19,6 +19,7 @@
     "db:push:staging": "dotenv -e .env.staging -- prisma db push",
     "db:seed:staging": "dotenv -e .env.staging -- prisma db seed",
     "db:studio:staging": "dotenv -e .env.staging -- prisma studio",
+    "test:unit": "tsx --test src/lib/__tests__/*.test.ts",
     "test:e2e": "playwright test"
   },
   "prisma": {
