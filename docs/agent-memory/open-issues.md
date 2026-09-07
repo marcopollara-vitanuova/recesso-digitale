@@ -15,6 +15,22 @@
   fix reale sarebbe Prisma 7, deliberatamente evitato. Rivalutare all'eventuale upgrade a Prisma 7.
 - Lint: 1 warning non eliminabile (`form.watch()` react-hook-form / React Compiler).
 
+## Risolti 2026-09-07 (sessione 6 — orchestrazione)
+- **Webhook Resend deployato e operativo**: `POST /api/webhooks/resend`, migrazione enum applicata (staging + **prod**), webhook creato su Resend (id `db9910f5-9262-4da6-8d63-ba6c032929a0`, eventi bounced/complained/delivered/failed/delivery_delayed/sent), `RESEND_WEBHOOK_SECRET` impostato su Vercel Production + redeploy. Verificato: firma errata → 400 `INVALID_SIGNATURE`.
+- **Emorragia invii fermata**: `broker_email` cambiato `recessi@vitanuova.it` → **`clienti@vitanuova.it`** (prod + staging, via API admin/audit). `recessi` non è più in `broker_email`/`broker_cc`/secondary → non compare più in nessun invio.
+- **Vercel**: login effettuato (device flow). Accesso team OK **usando le credenziali memorizzate** → per i comandi vercel usare `env -u VERCEL_TOKEN vercel ...` (il `VERCEL_TOKEN` in env è invalido e va ignorato/rimosso).
+- **Ordine deploy migrazione**: applicata migrazione PRIMA del deploy del codice (corretto).
+
+### 🔴 IMPATTO STORICO — richiede azione Compliance
+Con `recessi@vitanuova.it` in suppression dal ~25/06 e sempre in CC sull'email compagnia,
+**10 richieste (25/06 → 21/08) risultano `EMAIL_SENT` ma probabilmente NON sono arrivate alla compagnia**
+(l'intero messaggio veniva soppresso; il cliente riceveva comunque la conferma). Da ri-trasmettere:
+- REC-2026-000005 (pol 065269436) · 000006 Groupama (116356524) · 000007 Groupama (116356519)
+- 000008 D.A.S. (05205DAS01211) · 000009 Italiana (41212470) · 000010 D.A.S. (05205DAS01214)
+- 000011 Intesa Sanpaolo RBM Salute (0000123644) · 000012 Groupama (114063698)
+- 000013 D.A.S. (05205DAS01206) · 000014 Groupama (116069393, **scade 09/09**)
+Conferma puntuale del `suppressed` possibile solo via Resend (retention limitata: certo il 21/08).
+
 ### ⚠️ Da escalare all'IT (scoperta agente Resend, 2026-09-07)
 - **`recessi@vitanuova.it` bounce PERMANENTE** su Exchange (test reale: `bounced_permanent`,
   `delivered:0`; probabile `550 5.1.1` casella inesistente o `550 5.7.135` mittente esterno bloccato
@@ -74,6 +90,14 @@
 ## Qualità / test
 - Nessuna suite di test automatici presente (no Vitest/Playwright). Strategia test attuale = build + lint + smoke manuale.
 - Warning lint noti (non bloccanti): import inutilizzati in `email/send.ts`, `email/templates.ts`, `services/withdrawal.ts`; `form.watch()` react-hook-form non memoizzabile.
+
+## Aperti (azione utente/IT)
+- **Exchange `recessi@vitanuova.it`**: bounce permanente; casella/policy da sistemare (o dismettere). Mitigato lato piattaforma (broker_email = clienti). Il webhook ora rende visibili i futuri bounce.
+- **`onsalute@pec.it` suppressed** (bounce dal 29/07): invii verso quella PEC compagnia bloccati; verificare con la compagnia prima di riattivare.
+- **Verificare che `clienti@vitanuova.it` consegni davvero** (lo confermerà il webhook al prossimo invio).
+- **Ruotare credenziali admin** (`recesso.vitanuova.it/admin/login`): circolate in un thread email del 24/06 (handoff §6.1).
+- **`VERCEL_TOKEN` in env è invalido**: rimuoverlo/rigenerarlo; per ora i comandi vercel funzionano con la sessione CLI (login effettuato).
+- **Staging su Vercel**: ora possibile (ho accesso) — da decidere se procedere.
 
 ## Sicurezza (da tenere d'occhio)
 - Tutte le scritture admin passano da `requireRole` + `canWrite` + audit: OK.

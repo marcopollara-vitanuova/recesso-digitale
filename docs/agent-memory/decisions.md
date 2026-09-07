@@ -61,5 +61,12 @@
 - **Coordinamento due agenti / una working tree**: file disgiunti; regola = commit con `git add` esplicito, MAI `git add -A`. L'altro agente (Resend delivery webhook: enum EmailStatus, migration `20260907100000`, `src/app/api/webhooks/resend`, `webhook*.ts`) resta owner dei suoi file; io non li tocco. Handoff scambiati via utente.
 - **Prisma resta 6.19.3** (no Prisma 7): i 3 high residui sono dev-CLI, runtime pulito.
 
+### [2026-09-07] Sessione 6 — Orchestrazione webhook Resend + fix invii
+- Ruolo orchestratore: ho committato/deployato io la feature webhook di Claude (file suoi, `git add` esplicito), gestito le migrazioni e la configurazione. Nessun deploy da parte di Claude.
+- **Ordine**: (1) fix `broker_email` → `clienti@vitanuova.it` (ferma l'emorragia, runtime, autorizzato dall'utente/Compliance), (2) migrazione additiva staging→prod, (3) deploy codice webhook, (4) creato webhook su Resend + `RESEND_WEBHOOK_SECRET` su Vercel + redeploy.
+- **`broker_email` = clienti**: rimuove `recessi@vitanuova.it` (in suppression) da tutti gli invii, incluso il CC all'email compagnia (root cause della soppressione totale dei messaggi).
+- **Vercel**: `vercel login` (device flow) completato; usare `env -u VERCEL_TOKEN` (token env invalido).
+- **Impatto storico**: 10 richieste (25/06–21/08) probabilmente non arrivate alle compagnie → azione Compliance (ri-trasmissione). Il webhook chiude il guasto silenzioso da qui in avanti.
+
 ### [2026-06-24] Lezione operativa critica
 - **`.env.local` punta al DB Supabase di PRODUZIONE** (non esiste un DB di staging/local). Qualsiasi test contro `localhost` che chiama API admin scrive su dati reali. I test QA di questa sessione hanno creato/modificato dati reali e sono stati **ripristinati** subito (compagnia di test eliminata, template `technical_alert` riportato a seed, audit log di test ripuliti). REGOLA: per test distruttivi futuri usare un DB separato o limitarsi a smoke non-distruttivi.
