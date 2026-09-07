@@ -99,17 +99,33 @@ export function RecessoFlow({ privacyUrl }: { privacyUrl: string }) {
         <Card className="mx-auto max-w-2xl" aria-labelledby="recesso-landing-title">
           <CardHeader>
             <CardTitle id="recesso-landing-title" ref={titleRef} tabIndex={-1} className="text-2xl">
-              Esercita il diritto di recesso
+              Vuoi richiedere il recesso dalla polizza?
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-[var(--gray-700)]">
             <p>
-              Puoi inviare online la richiesta di recesso relativa a una polizza assicurativa acquistata tramite
-              canale digitale. La richiesta sarà trasmessa alla compagnia selezionata e al broker.
+              Questa pagina è dedicata esclusivamente alla richiesta di recesso, che può essere effettuata{" "}
+              <strong>entro 14 giorni</strong> dall&apos;acquisto della polizza.
             </p>
-            <p className="text-sm">
-              Ti serviranno: nome, cognome, codice fiscale, email, numero polizza e compagnia assicurativa.
+            <p>
+              Se invece vuoi disdire la polizza, dovrai inviare la richiesta tramite{" "}
+              <strong>raccomandata A/R o PEC</strong> almeno <strong>60 giorni</strong> prima della scadenza.
             </p>
+            <p>
+              Cliccando sul pulsante qui sotto potrai avviare la procedura online per richiedere il recesso da una
+              polizza assicurativa acquistata tramite canale digitale. La richiesta verrà trasmessa alla compagnia
+              assicurativa selezionata e al broker.
+            </p>
+            <div>
+              <p>Prima di iniziare, tieni a portata di mano:</p>
+              <ul className="mt-1 list-disc space-y-1 pl-5">
+                <li>nome e cognome;</li>
+                <li>codice fiscale;</li>
+                <li>indirizzo email;</li>
+                <li>numero di polizza;</li>
+                <li>compagnia assicurativa.</li>
+              </ul>
+            </div>
             <Button variant="teal" size="lg" onClick={() => setStep("form")}>
               Inizia la richiesta di recesso
             </Button>
