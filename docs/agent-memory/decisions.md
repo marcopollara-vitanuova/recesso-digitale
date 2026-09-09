@@ -68,5 +68,17 @@
 - **Vercel**: `vercel login` (device flow) completato; usare `env -u VERCEL_TOKEN` (token env invalido).
 - **Impatto storico**: 10 richieste (25/06–21/08) probabilmente non arrivate alle compagnie → azione Compliance (ri-trasmissione). Il webhook chiude il guasto silenzioso da qui in avanti.
 
+### [2026-09-09] Sessione 7 — RLS Supabase (sicurezza)
+- **Modello di sicurezza scelto: server-only (RLS ON, zero policy)** su tutte le tabelle `public`.
+  Migrazione `20260909160000_enable_rls_public_tables`.
+- **Perché è sicuro senza policy**: l'app accede via Prisma con ruolo owner `postgres`
+  (`rolbypassrls=true`) → bypassa RLS; non usa il Data API/`anon`/`authenticated`. Quindi abilitare
+  RLS chiude l'esposizione PostgREST senza toccare l'app. Scelta contro l'ipotesi iniziale di policy
+  per-user (`auth.uid()=user_id`), **non applicabile**: nessuna colonna ownership, niente Supabase Auth.
+- **Grant `anon`/`authenticated` non revocati**: con RLS+no policy sono inerti; revoca = hardening
+  opzionale futuro, non necessaria a chiudere `rls_disabled_in_public`.
+- **Validazione staging-first** poi prod (stessa migrazione, schemi diversi via search_path). Nomi
+  tabella non qualificati nella migrazione per risolvere correttamente su `staging` e `public`.
+
 ### [2026-06-24] Lezione operativa critica
 - **`.env.local` punta al DB Supabase di PRODUZIONE** (non esiste un DB di staging/local). Qualsiasi test contro `localhost` che chiama API admin scrive su dati reali. I test QA di questa sessione hanno creato/modificato dati reali e sono stati **ripristinati** subito (compagnia di test eliminata, template `technical_alert` riportato a seed, audit log di test ripuliti). REGOLA: per test distruttivi futuri usare un DB separato o limitarsi a smoke non-distruttivi.

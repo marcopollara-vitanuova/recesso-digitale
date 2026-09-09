@@ -15,6 +15,18 @@
   fix reale sarebbe Prisma 7, deliberatamente evitato. Rivalutare all'eventuale upgrade a Prisma 7.
 - Lint: 1 warning non eliminabile (`form.watch()` react-hook-form / React Compiler).
 
+## Risolti 2026-09-09 (sessione 7 — sicurezza Supabase RLS)
+- **🔴 CRITICO → RISOLTO: RLS disabilitato su 7 tabelle public** (`users`, `insurance_companies`,
+  `withdrawal_requests`, `email_logs`, `email_templates`, `audit_logs`, `internal_notes`) esposte a
+  PostgREST con grant pieni `anon`/`authenticated` → esposizione di `password_hash` e PII.
+  **Fix**: migrazione `20260909160000_enable_rls_public_tables` (ALTER TABLE ... ENABLE ROW LEVEL
+  SECURITY su tutte + `settings`), **senza policy** (tabelle server-only).
+  **Sicuro perché** l'app usa il ruolo owner `postgres` (`rolbypassrls=true`) via Prisma → bypassa
+  RLS; non usa il Data API. Validato **staging-first** (users=1/companies=9), poi **prod**
+  (users=1/companies=34/requests=14): app OK, zero rotture. `rls_disabled_in_public` chiuso.
+  Grant ampi ora inerti (RLS+no policy nega tutto via Data API); revoca grant = hardening opzionale.
+  Dettaglio completo in `/supabase-security-context.md` §12.
+
 ## Risolti 2026-09-07 (sessione 6 — orchestrazione)
 - **Webhook Resend deployato e operativo**: `POST /api/webhooks/resend`, migrazione enum applicata (staging + **prod**), webhook creato su Resend (id `db9910f5-9262-4da6-8d63-ba6c032929a0`, eventi bounced/complained/delivered/failed/delivery_delayed/sent), `RESEND_WEBHOOK_SECRET` impostato su Vercel Production + redeploy. Verificato: firma errata → 400 `INVALID_SIGNATURE`.
 - **Emorragia invii fermata**: `broker_email` cambiato `recessi@vitanuova.it` → **`clienti@vitanuova.it`** (prod + staging, via API admin/audit). `recessi` non è più in `broker_email`/`broker_cc`/secondary → non compare più in nessun invio.
